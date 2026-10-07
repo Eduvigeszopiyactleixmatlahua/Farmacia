@@ -1,0 +1,174 @@
+@startuml
+title P7 – Punto de Venta y Surtido de una Farmacia
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package modelo {
+  interface Vendible {
+    {static} +TASA_IMPUESTO : double
+    +clave() : Sku
+    +nombre() : String
+    +precioBase() : double
+    +tarifa(u : int) : double
+    +tarifaConImpuesto(u : int) : double
+    {static} +porNombre() : Comparator
+  }
+  interface RequiereReceta {
+    +tipoReceta() : String
+    +descripcionCorta() : String
+  }
+  interface Fraccionable {
+    +dosisPorEnvase() : int
+    +descripcionCorta() : String
+  }
+  abstract class Producto <<sealed>> {
+    -clave : Sku
+    -nombre : String
+    -precioBase : double
+    -creadoEn : LocalDateTime
+    -cotizaciones : int <<transient>>
+    +tarifa(u : int) : double <<final>>
+    {abstract} #calcularTarifa(u : int) : double
+    {abstract} +copiar() : Producto
+  }
+  class "Producto.Patente" as Patente <<static final>> {
+    {static} +PREFIJO : String = "PAT"
+    -laboratorio : String
+    #calcularTarifa(u : int) : double
+    +copiar() : Patente
+  }
+  class "Producto.Generico" as Generico <<static final>> {
+    {static} +PREFIJO : String = "GEN"
+    -concentracionMg : int
+    #calcularTarifa(u : int) : double
+    +copiar() : Generico
+  }
+  class "Producto.Biologico" as Biologico <<static final>> {
+    {static} +PREFIJO : String = "BIO"
+    -temperaturaMax : int
+    #calcularTarifa(u : int) : double
+    +copiar() : Biologico
+  }
+  class Sku <<record>> {
+    prefijo : String
+    numero : int
+    {static} +siguiente(prefijo : String) : Sku
+    {static} +parse(texto : String) : Sku
+  }
+  enum Nivel {
+    GENERAL
+    AFILIADO
+    ADULTO_MAYOR
+    +aplicar(monto : double) : double
+  }
+  enum Estado {
+    ABIERTA
+    EN_CURSO
+    CERRADA
+    CANCELADA
+    +permiteTransicionA(d : Estado) : boolean
+  }
+  class Cliente <<Externalizable>> {
+    -id : int
+    -nombre : String
+    -correo : String
+    -nivel : Nivel
+  }
+  class Venta {
+    -id : int
+    -fecha : LocalDate
+    -estado : Estado
+    +agregar(e : Producto, u : int) : Linea
+    +cambiarEstado(d : Estado)
+    +total() : double
+  }
+  class "Venta.Linea" as Linea <<inner>> {
+    -unidades : int
+    +importe() : double
+  }
+  class Anaquel {
+    +agregar(e : Producto...)
+    +filtrar(r : Regla) : List
+    {static} +porTarifa(u : int) : Comparator
+    +resumen() : String
+  }
+  class "Anaquel.Iterador" as Iterador <<private inner>>
+}
+
+package funcional {
+  interface "Regla<T>" as Regla <<functional>> {
+    +evaluar(t : T) : boolean
+    +y(o) : Regla
+    +o(o) : Regla
+    +negar() : Regla
+  }
+  interface "FabricaElemento<E extends Producto, A>" as Fabrica <<functional>> {
+    +crear(nombre, precio, atributo : A) : E
+  }
+}
+
+package concurrencia {
+  abstract class TareaPeriodica implements Runnable {
+    -activa : boolean <<volatile>>
+    +iniciar(nombre : String)
+    +detener()
+    {abstract} #ejecutarCiclo()
+  }
+}
+
+package eventos {
+  interface OyenteEvento <<functional>>
+  class Evento <<record>>
+}
+
+package persistencia {
+  interface "Repositorio<T,K>" as Repositorio
+  class RepositorioProductoSQLite
+  class RepositorioClienteSQLite
+  class RepositorioVentaSQLite
+  class ConexionSQLite
+  class Respaldo
+}
+
+package servicio {
+  class Farmacia {
+    +registrar(f : FabricaElemento, ...) : E
+    +abrir(id : int) : Venta
+    +revisar() : int
+    +iniciarMonitor(ms : long)
+  }
+  class "Farmacia.MonitorSurtido" as Monitor <<inner>>
+}
+
+Producto ..|> Vendible
+Patente --|> Producto
+Producto +-- Patente
+Patente ..|> RequiereReceta
+Generico --|> Producto
+Producto +-- Generico
+Generico ..|> Fraccionable
+Biologico --|> Producto
+Producto +-- Biologico
+Biologico ..|> RequiereReceta
+Biologico ..|> Fraccionable
+Venta *-- "1..*" Linea
+Venta +-- Linea
+Linea --> "1" Producto
+Venta --> "1" Cliente
+Venta --> Estado
+Cliente --> Nivel
+Anaquel o-- "0..*" Producto
+Anaquel +-- Iterador
+Anaquel ..> Regla
+Fabrica ..> Producto
+Farmacia +-- Monitor
+Monitor --|> TareaPeriodica
+Farmacia o-- "0..*" OyenteEvento
+Farmacia --> Anaquel
+Farmacia --> Repositorio
+RepositorioProductoSQLite ..|> Repositorio
+RepositorioClienteSQLite ..|> Repositorio
+RepositorioVentaSQLite ..|> Repositorio
+RepositorioVentaSQLite --> ConexionSQLite
+OyenteEvento ..> Evento
+@enduml
