@@ -12,6 +12,7 @@ public interface RequiereReceta {
 
     default String descripcionCorta() {
         // TODO E05: Devolver "Receta: " concatenado con el valor de tipoReceta().
-        throw new UnsupportedOperationException("TODO E05");
+        return "Receta: " + tipoReceta();
+        //throw new UnsupportedOperationException("TODO E05");
     }
 }

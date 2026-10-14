@@ -12,6 +12,7 @@ public interface Fraccionable {
 
     default String descripcionCorta() {
         // TODO E05: Devolver "Dosis por envase: " concatenado con el valor de dosisPorEnvase().
-        throw new UnsupportedOperationException("TODO E05");
+        return "Dosis por envase: " + dosisPorEnvase();
+        //throw new UnsupportedOperationException("TODO E05");
     }
 }

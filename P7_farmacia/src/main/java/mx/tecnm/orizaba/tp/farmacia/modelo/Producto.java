@@ -52,7 +52,13 @@ public abstract sealed class Producto implements Vendible, Serializable
     /** Constructor para objetos reconstruidos (persistencia) con clave conocida. */
     protected Producto(Sku clave, String nombre, double precioBase) {
         // TODO E04: Asignar la clave (no nula), registrarla en Sku.registrar y validar nombre y precio mediante los setters.
-        throw new UnsupportedOperationException("TODO E04");
+        this.clave = Objects.requireNonNull(clave);
+        Sku.registrar(this.clave);
+        //Validar nombre
+        setNombre(nombre);
+        //Guardar precioBase dentro del contructor
+        setPrecioBase(precioBase);
+        //throw new UnsupportedOperationException("TODO E04");
     }
 
     public static int instanciasCreadas() {
@@ -84,23 +90,41 @@ public abstract sealed class Producto implements Vendible, Serializable
 
     public final void setNombre(String nombre) {
         // TODO E04: Rechazar nombres nulos o en blanco (ReglaNegocioException); guardar el nombre sin espacios extremos.
-        throw new UnsupportedOperationException("TODO E04");
+        if(nombre == null || nombre.isBlank()){
+            throw new ReglaNegocioException("Nombre invalido");
+        }
+        this.nombre = nombre.strip();
+        //throw new UnsupportedOperationException("TODO E04");
     }
 
     public final void setPrecioBase(double precioBase) {
         // TODO E04: Rechazar precios negativos, NaN o infinitos (ReglaNegocioException).
-        throw new UnsupportedOperationException("TODO E04");
+        //!Double.isFinite() rechaza tanto NaN como los infinitos. El precio cero está permitido por este TODO
+        if(precioBase   < 0 || !Double.isFinite(precioBase)){
+            throw new ReglaNegocioException("Valor incorrecto");
+        }
+        this.precioBase = precioBase;
+        //throw new UnsupportedOperationException("TODO E04");
     }
 
     /** Método plantilla: valida, contabiliza y redondea; la variación la aporta cada subtipo. */
     @Override
     public final double tarifa(int unidades) {
         // TODO E04: Validar unidades > 0 (ReglaNegocioException), incrementar cotizaciones y devolver calcularTarifa redondeada a 2 decimales.
-        throw new UnsupportedOperationException("TODO E04");
+        if (unidades   <= 0) {
+          throw new ReglaNegocioException("Unidades no validas");
+        }
+
+        //Despues incrementamos el contador
+        cotizaciones ++ ;
+        return  Math.round(calcularTarifa(unidades) * 100.00) / 100.00;
+
+        //throw new UnsupportedOperationException("TODO E04");
     }
 
     /** Punto de variación del Template Method. */
     protected abstract double calcularTarifa(int unidades);
+
 
     /** Copia con clave nueva; los subtipos la redefinen con <strong>retorno covariante</strong>. */
     public abstract Producto copiar();
@@ -149,7 +173,11 @@ public abstract sealed class Producto implements Vendible, Serializable
 
         private static String validar(String laboratorio) {
             // TODO E05: Validar: laboratorio != null && !laboratorio.isBlank() (si no se cumple: ReglaNegocioException "El laboratorio es obligatorio").
-            throw new UnsupportedOperationException("TODO E05");
+            if(!(laboratorio != null && !laboratorio.isBlank())){
+                throw new ReglaNegocioException("El laboratorio es obligatorio");
+            }
+            return laboratorio;
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         public String laboratorio() {
@@ -159,14 +187,18 @@ public abstract sealed class Producto implements Vendible, Serializable
         @Override
         protected double calcularTarifa(int unidades) {
             // TODO E05: Patente: precio por pieza. Fórmula: precioBase() * unidades
-            throw new UnsupportedOperationException("TODO E05");
+           //Regresa metodo tarifa de la clase padre
+            return precioBase() * unidades;
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         /** Retorno covariante: devuelve Patente, no Producto. */
         @Override
         public Patente copiar() {
             // TODO E05: Crear un nuevo Patente con el mismo nombre, precio y atributo (clave nueva).
-            throw new UnsupportedOperationException("TODO E05");
+            //retorno covariante
+            return new Patente(nombre(), precioBase(), laboratorio());
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         @Override
@@ -204,7 +236,11 @@ public abstract sealed class Producto implements Vendible, Serializable
 
         private static int validar(int concentracionMg) {
             // TODO E05: Validar: concentracionMg > 0 (si no se cumple: ReglaNegocioException "La concentración debe ser positiva").
-            throw new UnsupportedOperationException("TODO E05");
+            if (concentracionMg  <= 0){
+                throw new ReglaNegocioException("La concentración debe ser positiva");
+            }
+            return concentracionMg;
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         public int concentracionMg() {
@@ -214,14 +250,16 @@ public abstract sealed class Producto implements Vendible, Serializable
         @Override
         protected double calcularTarifa(int unidades) {
             // TODO E05: Genérico: 10 % adicional si supera 500 mg. Fórmula: precioBase() * unidades * (concentracionMg > 500 ? 1.1 : 1.0)
-            throw new UnsupportedOperationException("TODO E05");
+            return precioBase() * unidades * (concentracionMg > 500 ? 1.1 : 1.0);
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         /** Retorno covariante: devuelve Generico, no Producto. */
         @Override
         public Generico copiar() {
             // TODO E05: Crear un nuevo Generico con el mismo nombre, precio y atributo (clave nueva).
-            throw new UnsupportedOperationException("TODO E05");
+            return new Generico(nombre(), precioBase(), concentracionMg());
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         @Override
@@ -259,7 +297,11 @@ public abstract sealed class Producto implements Vendible, Serializable
 
         private static int validar(int temperaturaMax) {
             // TODO E05: Validar: temperaturaMax >= 2 && temperaturaMax <= 8 (si no se cumple: ReglaNegocioException "La temperatura de conservación debe estar entre 2 y 8 °C").
-            throw new UnsupportedOperationException("TODO E05");
+            if(temperaturaMax  <2 || temperaturaMax >8){
+                throw new ReglaNegocioException("La temperatura de conservación debe estar entre 2 y 8 ºC");
+            }
+            return temperaturaMax;
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         public int temperaturaMax() {
@@ -269,14 +311,16 @@ public abstract sealed class Producto implements Vendible, Serializable
         @Override
         protected double calcularTarifa(int unidades) {
             // TODO E05: Biológico: 8 % de descuento a partir de 10 piezas. Fórmula: unidades >= 10 ? precioBase() * unidades * 0.92 : precioBase() * unidades
-            throw new UnsupportedOperationException("TODO E05");
+            return unidades >= 10 ? precioBase() * unidades * 0.92 : precioBase() * unidades;
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         /** Retorno covariante: devuelve Biologico, no Producto. */
         @Override
         public Biologico copiar() {
             // TODO E05: Crear un nuevo Biologico con el mismo nombre, precio y atributo (clave nueva).
-            throw new UnsupportedOperationException("TODO E05");
+            return new Biologico(nombre(), precioBase(), temperaturaMax());
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         @Override
@@ -293,7 +337,11 @@ public abstract sealed class Producto implements Vendible, Serializable
         @Override
         public String descripcionCorta() {
             // TODO E05: Combinar RequiereReceta.super.descripcionCorta() y Fraccionable.super.descripcionCorta() separados por " | ".
-            throw new UnsupportedOperationException("TODO E05");
+            //Implementación default de descripcionCorta() que pertenecer a RequiereRecta.
+            return RequiereReceta.super.descripcionCorta() + " | "
+            //Ejecuta la implementación default de Fraccionable
+            + Fraccionable.super.descripcionCorta();
+            //throw new UnsupportedOperationException("TODO E05");
         }
 
         @Override
