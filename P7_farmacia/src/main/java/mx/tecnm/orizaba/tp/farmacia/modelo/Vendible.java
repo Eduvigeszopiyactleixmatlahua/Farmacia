@@ -26,7 +26,7 @@ public interface Vendible {
     default double tarifaConImpuesto(int unidades) {
         // TODO E02: Aplicar TASA_IMPUESTO a tarifa(unidades) y redondear a 2 decimales.
         double calcularprecio = tarifa(unidades)*(1 + TASA_IMPUESTO);
-        double dosdecimales = Math.round(calcularprecio * 100)/100;
+        double dosdecimales = Math.round(calcularprecio * 100)/100.0;
         return dosdecimales;
         //throw new UnsupportedOperationException("TODO E02");
     }
@@ -35,7 +35,7 @@ public interface Vendible {
     static Comparator<Vendible> porNombre() {
         // TODO E02: Usar Comparator.comparing(Vendible::nombre, String.CASE_INSENSITIVE_ORDER).
         return Comparator.comparing(Vendible::nombre, String.CASE_INSENSITIVE_ORDER);
-        //22throw new UnsupportedOperationException("TODO E02");
+        //throw new UnsupportedOperationException("TODO E02");
 
     }
 }
