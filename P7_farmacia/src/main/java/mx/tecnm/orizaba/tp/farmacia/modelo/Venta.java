@@ -48,7 +48,19 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
     /** Constructor completo (también usado al reconstruir desde la base de datos). */
     public Venta(int id, Cliente cliente, LocalDate fecha) {
         // TODO E07: Validar id > 0, actor y fecha no nulos; asignar y sincronizar SECUENCIA con accumulateAndGet(id, Math::max).
-        throw new UnsupportedOperationException("TODO E07");
+        if ( id  <= 0){
+            throw  new ReglaNegocioException("El identificador es invalido");
+        }
+        //Validar referencias
+        Objects.requireNonNull(cliente);
+        Objects.requireNonNull(fecha);
+        //Asignar atributos
+        this.id = id;
+        this.cliente = cliente;
+        this.fecha = fecha;
+        //Actualiza el valor de AtomicInteger con accumulateAndGet
+        SECUENCIA.accumulateAndGet(id, Math::max);
+        //throw new UnsupportedOperationException("TODO E07");
     }
 
     public int id() {
@@ -70,18 +82,51 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
     /** Agrega una línea; sólo es posible mientras está ABIERTA y sin repetir producto. */
     public synchronized Linea agregar(Producto elemento, int unidades) {
         // TODO E07: Exigir estado ABIERTA, rechazar elementos repetidos (stream anyMatch), crear la Linea interna y añadirla.
-        throw new UnsupportedOperationException("TODO E07");
+        //Validar el estado
+        if (estado != Estado.ABIERTA){
+            throw new ReglaNegocioException("La venta no está abierta");
+        }
+        //Comprobar productos repetidos
+        boolean repetido = lineas.stream().anyMatch(linea -> linea.elemento().clave().equals(elemento.clave()));
+        //Rechazar si esta repetido
+        if (repetido){
+            throw new ReglaNegocioException("Producto repetido");
+        }
+        //Crear y añadir linea pendiente
+        Linea nuevalinea = new Linea(elemento, unidades);
+        //Agregar la lista
+        lineas.add(nuevalinea);
+        //Devolver linea
+        return nuevalinea;
+        //throw new UnsupportedOperationException("TODO E07");
     }
 
     /** Quita la línea del producto indicado (sólo en estado ABIERTA). */
     public synchronized boolean quitar(Sku clave) {
         // TODO E07: Exigir estado ABIERTA y eliminar con removeIf la línea cuyo elemento tenga esa clave.
-        throw new UnsupportedOperationException("TODO E07");
+        //Validar que la venta esté ABIERTA
+        if (estado != Estado.ABIERTA){
+            throw new ReglaNegocioException("La venta no está abierta");
+        }
+        //Eliminar la línea cuya clave coincida
+        return lineas.removeIf(linea -> linea.elemento().clave().equals(clave));
+
+        //throw new UnsupportedOperationException("TODO E07");
     }
 
     public synchronized void cambiarEstado(Estado destino) {
         // TODO E07: Validar la transición con permiteTransicionA y exigir al menos una línea para pasar a EN_CURSO.
-        throw new UnsupportedOperationException("TODO E07");
+        //Validar la transición
+        if (!estado.permiteTransicionA(destino)){
+            throw new ReglaNegocioException("Transición no permitida");
+        }
+
+        if(destino == Estado.EN_CURSO && lineas.isEmpty()){
+           throw new ReglaNegocioException("La venta no tiene productos");
+        }
+        //Actualizar el estado
+        this.estado = destino;
+        //throw new UnsupportedOperationException("TODO E07");
     }
 
     public void iniciar() {
@@ -108,13 +153,20 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
     /** Suma de subtotales sin descuento. */
     public synchronized double subtotal() {
         // TODO E08: Sumar los subtotales de las líneas con mapToDouble y redondear a 2 decimales.
-        throw new UnsupportedOperationException("TODO E08");
+        //Suma los subtotales de cada línea
+        double suma = lineas.stream().mapToDouble(linea -> linea.subtotal()).sum();
+        //Redondear a dos decimales
+        return redondear(suma);
+        //throw new UnsupportedOperationException("TODO E08");
     }
 
     /** Total con el descuento del nivel del cliente. */
     public synchronized double total() {
         // TODO E08: Sumar los importes de las líneas (ya con descuento) y redondear a 2 decimales.
-        throw new UnsupportedOperationException("TODO E08");
+
+        double suma = lineas.stream().mapToDouble(linea -> linea.importe()).sum();
+        return redondear(suma);
+        //throw new UnsupportedOperationException("TODO E08");
     }
 
     public long diasDesde(LocalDate hoy) {
@@ -149,7 +201,12 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
 
         private Linea(Producto elemento, int unidades) {
             // TODO E07: Validar unidades > 0 y asignar los campos.
-            throw new UnsupportedOperationException("TODO E07");
+            if (unidades  <= 0){
+                throw new ReglaNegocioException("Unidades inválidas");
+            }
+            this.elemento = Objects.requireNonNull(elemento);
+            this.unidades = unidades;
+            //throw new UnsupportedOperationException("TODO E07");
         }
 
         public Producto elemento() {
@@ -167,7 +224,8 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
         /** Importe con el descuento del nivel del cliente de la envolvente. */
         public double importe() {
             // TODO E08: Usar Venta.this.cliente.nivel().aplicar(subtotal()).
-            throw new UnsupportedOperationException("TODO E08");
+            return Venta.this.cliente.nivel().aplicar(subtotal());
+            //throw new UnsupportedOperationException("TODO E08");
         }
 
         public Venta contenedor() {

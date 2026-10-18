@@ -34,7 +34,19 @@ public class Anaquel implements Iterable<Producto>, Serializable {
 
     public final void agregar(Producto... nuevos) {
         // TODO E09: Recorrer los argumentos; rechazar nulos y claves duplicadas (ReglaNegocioException); usar putIfAbsent.
-        throw new UnsupportedOperationException("TODO E09");
+        for (Producto producto : nuevos){
+            //Rechar productos nulos
+            if(producto == null){
+                throw new ReglaNegocioException(("Producto nulo"));
+            }
+            //Insertar mediante putIfAbsent
+            Producto anterior = elementos.putIfAbsent(producto.clave(), producto);
+            //Rechazar si laclave ya existia
+            if (anterior != null){
+                throw new ReglaNegocioException("Producto duplicado");
+            }
+        }
+        //throw new UnsupportedOperationException("TODO E09");
     }
 
     public Optional<Producto> buscar(Sku clave) {
@@ -52,13 +64,16 @@ public class Anaquel implements Iterable<Producto>, Serializable {
     /** Filtrado con la interfaz funcional propia {@link Regla}. */
     public List<Producto> filtrar(Regla<? super Producto> regla) {
         // TODO E09: Stream de los valores filtrado con regla::evaluar y recolectado con toList().
-        throw new UnsupportedOperationException("TODO E09");
+        //Obtener los productos almacenados en el mapa elementos
+        return elementos.values().stream().filter(regla::evaluar).toList();
+        //throw new UnsupportedOperationException("TODO E09");
     }
 
     /** Filtrado por subtipo con genéricos acotados: {@code deTipo(Producto.Patente.class)}. */
     public <E extends Producto> List<E> deTipo(Class<E> tipo) {
         // TODO E09: Usar filter(tipo::isInstance) y map(tipo::cast).
-        throw new UnsupportedOperationException("TODO E09");
+        return elementos.values().stream().filter(tipo::isInstance).map(tipo::cast).toList();
+        //throw new UnsupportedOperationException("TODO E09");
     }
 
     public List<Producto> ordenados(Comparator<? super Producto> criterio) {
@@ -71,13 +86,43 @@ public class Anaquel implements Iterable<Producto>, Serializable {
      */
     public static Comparator<Producto> porTarifa(final int unidades) {
         // TODO E10: Devolver new Comparator<>() { compare(a, b) → Double.compare(a.tarifa(unidades), b.tarifa(unidades)) }.
-        throw new UnsupportedOperationException("TODO E10");
+        return new Comparator<Producto>() {
+            @Override
+            public int compare(Producto a, Producto b) {
+                return Double.compare(a.tarifa(unidades), b.tarifa(unidades));
+            }
+        };
+        //throw new UnsupportedOperationException("TODO E10");
     }
 
     /** Resumen calculado con una <strong>clase local</strong> (véase {@code Parcel05}). */
     public String resumen() {
         // TODO E10: Declarar dentro del método la clase local Acumulador (cuenta, suma, mínimo, máximo) y recorrer el catálogo.
-        throw new UnsupportedOperationException("TODO E10");
+        class Acumulador {
+            int cuenta = 0;
+            double suma = 0;
+            double minimo = Double.POSITIVE_INFINITY;
+            double maximo = Double.NEGATIVE_INFINITY;
+        }
+        Acumulador acumulador = new Acumulador();
+        for (Producto producto : elementos.values()){
+            //Obtener precio
+            double precio = producto.precioBase();
+            //Actualizar atributos del acumulador
+            acumulador.cuenta++;
+            acumulador.suma += precio;
+
+            acumulador.minimo = Math.min(acumulador.minimo, precio);
+            acumulador.maximo = Math.max(acumulador.maximo, precio);
+        }
+        //Devolver resumen aunque el anaquel esté vacío
+        if(acumulador.cuenta == 0){
+            acumulador.minimo = 0;
+            acumulador.maximo = 0;
+        }
+
+        return String.format("%d productos, suma: %.2f, mínimo: %.2f, máximo: %.2f", acumulador.cuenta, acumulador.suma, acumulador.minimo, acumulador.maximo);
+        //throw new UnsupportedOperationException("TODO E10");
     }
 
     @Override
@@ -102,7 +147,13 @@ public class Anaquel implements Iterable<Producto>, Serializable {
         @Override
         public Producto next() {
             // TODO E10: Lanzar NoSuchElementException si no hay siguiente; devolver el elemento y avanzar el cursor.
-            throw new UnsupportedOperationException("TODO E10");
+            //Comprobar si existe otro producto
+            if (!hasNext()){
+                throw new NoSuchElementException();
+            }
+            //Devolver el producto actual y avanzar el cursor
+            return instantanea.get(cursor++);
+            //throw new UnsupportedOperationException("TODO E10");
         }
     }
 }

@@ -265,12 +265,45 @@ public class Farmacia implements AutoCloseable {
      */
     public synchronized int revisar() {
         // TODO E12: Recorrer los registros y aplicar las dos reglas con un switch sobre el estado.
-        throw new UnsupportedOperationException("TODO E12");
+        int acciones = 0;
+        LocalDate hoy = reloj.get();
+        for (Venta venta : registros.values()){
+            long dias = venta.diasDesde(hoy);
+            switch (venta.estado()){
+                case ABIERTA -> {
+                    if (venta.lineas().isEmpty() && dias >= 1){
+                        venta.cancelar();
+                        repoRegistros.guardar(venta);
+                        publicar(
+                                TipoEvento.CANCELACION_AUTOMATICA,
+                                "Venta #" + venta.id() + " cancelada"
+                        );
+                        acciones++;
+                    }
+                }
+                case EN_CURSO -> {
+                    if (dias > PLAZO_DIAS && alertados.add(venta.id())){
+                        publicar(TipoEvento.ALERTA,"Venta #" + venta.id() + "vencida");
+                        acciones++;
+                    }
+                }
+                case CERRADA, CANCELADA -> {
+
+                }
+            }
+        }
+        return acciones;
+        //throw new UnsupportedOperationException("TODO E12");
     }
 
     public synchronized void iniciarMonitor(long periodoMs) {
         // TODO E12: Crear el monitor interno (new MonitorSurtido(periodoMs)) e iniciarlo con un nombre de hilo descriptivo.
-        throw new UnsupportedOperationException("TODO E12");
+        if (monitor != null && monitor.activa()) {
+            throw new IllegalStateException("El monitor ya está activo");
+        }
+        monitor = new MonitorSurtido(periodoMs);
+        monitor.iniciar("Monitor surtido farmacia");
+        //throw new UnsupportedOperationException("TODO E12");
     }
 
     public void detenerMonitor() throws InterruptedException {
@@ -299,7 +332,8 @@ public class Farmacia implements AutoCloseable {
         @Override
         protected void ejecutarCiclo() {
             // TODO E12: Delegar en la envolvente: Farmacia.this.revisar().
-            throw new UnsupportedOperationException("TODO E12");
+            Farmacia.this.revisar();
+            //throw new UnsupportedOperationException("TODO E12");
         }
     }
 

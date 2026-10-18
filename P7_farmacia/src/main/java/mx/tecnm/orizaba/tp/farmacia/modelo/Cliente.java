@@ -27,7 +27,19 @@ public class Cliente implements Externalizable {
 
     public Cliente(int id, String nombre, String correo, Nivel nivel) {
         // TODO E06: Validar id > 0 y asignar nombre, correo y nivel mediante sus setters.
-        throw new UnsupportedOperationException("TODO E06");
+        //Validar que id sea mayor que cero
+        if(id   <= 0){
+            throw new ReglaNegocioException("El id debe ser positivo");
+        }
+        //Asignar el id al atributo del objeto
+        this.id = id;
+        //Asignar nombre mediante setNombre()
+        setNombre(nombre);
+        //Asignar correo mediante setCorreo()
+        setCorreo(correo);
+        //Asignar nivel mediante setNivel()
+        setNivel(nivel);
+        //throw new UnsupportedOperationException("TODO E06");
     }
 
     /** Encadenamiento de constructores: nivel por omisión. */
@@ -53,12 +65,23 @@ public class Cliente implements Externalizable {
 
     public final void setNombre(String nombre) {
         // TODO E06: Rechazar nombre nulo o en blanco.
-        throw new UnsupportedOperationException("TODO E06");
+        //Comprobar si es nulo o está en blanco
+        if (nombre == null || nombre.isBlank()){
+            //Excepción
+            throw new ReglaNegocioException("Verificar nombre");
+        }
+        this.nombre = nombre;
+        //throw new UnsupportedOperationException("TODO E06");
     }
 
     public final void setCorreo(String correo) {
         // TODO E06: Validar el correo con el patrón CORREO y guardarlo en minúsculas.
-        throw new UnsupportedOperationException("TODO E06");
+        if(correo == null || !CORREO.matcher(correo).matches()){
+            throw new ReglaNegocioException("Correo invalido");
+        }
+        //CConvertir correo a minusculas y guardarlo en el atributo del objeto
+        this.correo = correo.toLowerCase();
+        //throw new UnsupportedOperationException("TODO E06");
     }
 
     public final void setNivel(Nivel nivel) {
@@ -68,12 +91,31 @@ public class Cliente implements Externalizable {
     @Override
     public void writeExternal(ObjectOutput salida) throws IOException {
         // TODO E14: Escribir id, nombre, correo y el nombre del nivel (writeInt / writeUTF).
-        throw new UnsupportedOperationException("TODO E14");
+        salida.writeInt(id);
+        //Escribir el nombre
+        salida.writeUTF(nombre);
+        //Escribir el correo
+        salida.writeUTF(correo);
+        //Escribir el nombre de la constante Nivel
+        salida.writeUTF(nivel.name());
+        //throw new UnsupportedOperationException("TODO E14");
     }
 
     @Override
     public void readExternal(ObjectInput entrada) throws IOException {
         // TODO E14: Leer en el mismo orden en que se escribió y reconstruir el nivel con Nivel.valueOf.
+       /*** //Leer el identificar
+        int idleido = entrada.readInt();
+        //Validar que el identificador sea positivo
+        if (idleido  <=0){
+            throw new ReglaNegocioException("Invalido");
+        }
+        //Asignar el identificador al objeto
+        this.id = idleido;
+        //Leer y asignar el nombre
+        String nombreleer = entrada.readUTF();
+        //Leer y asignar el correo
+        setNombre(nombreleer); ///CHECAR***/
         throw new UnsupportedOperationException("TODO E14");
     }
 
