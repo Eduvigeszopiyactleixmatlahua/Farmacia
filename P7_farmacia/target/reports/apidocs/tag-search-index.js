@@ -1,1 +1,0 @@
-tagSearchIndex = [{"l":"Clases principales:","h":"package mx.tecnm.orizaba.tp.farmacia.ui","d":"Section","u":"mx/tecnm/orizaba/tp/farmacia/ui/package-summary.html#clases-principales--heading"},{"l":"Constant Field Values","h":"","u":"constant-values.html"},{"l":"Serialized Form","h":"","u":"serialized-form.html"}];updateSearchResults();
