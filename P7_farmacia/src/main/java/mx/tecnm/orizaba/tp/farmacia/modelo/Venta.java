@@ -29,11 +29,16 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final AtomicInteger SECUENCIA = new AtomicInteger();
-
+    /**
+     * Atributo interno del componente.
+     */
     private final int id;
     private final Cliente cliente;
     private final LocalDate fecha;
     private Estado estado;
+    /**
+     * Obtiene una vista inmodificable de las líneas.
+     */
     private final List<Linea> lineas = new ArrayList<>();
 
     {
@@ -79,7 +84,12 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
         return estado;
     }
 
-    /** Agrega una línea; sólo es posible mientras está ABIERTA y sin repetir producto. */
+    /**
+     * Agrega una línea; sólo es posible mientras está ABIERTA y sin repetir producto.
+     * @param elemento medicamento asociado a la operación.
+     * @param unidades cantidad positiva de unidades.
+     * @return línea de venta creada.
+     */
     public synchronized Linea agregar(Producto elemento, int unidades) {
         // TODO E07: Exigir estado ABIERTA, rechazar elementos repetidos (stream anyMatch), crear la Linea interna y añadirla.
         //Validar el estado
@@ -101,7 +111,11 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
         //throw new UnsupportedOperationException("TODO E07");
     }
 
-    /** Quita la línea del producto indicado (sólo en estado ABIERTA). */
+    /**
+     * Quita la línea del producto indicado (sólo en estado ABIERTA).
+     * @param clave clave que identifica al registro.
+     * @return {@code true} si se retiró la línea.
+     */
     public synchronized boolean quitar(Sku clave) {
         // TODO E07: Exigir estado ABIERTA y eliminar con removeIf la línea cuyo elemento tenga esa clave.
         //Validar que la venta esté ABIERTA
@@ -113,7 +127,10 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
 
         //throw new UnsupportedOperationException("TODO E07");
     }
-
+    /**
+     * Cambia el estado según las transiciones permitidas.
+     * @param destino estado al que se desea transitar.
+     */
     public synchronized void cambiarEstado(Estado destino) {
         // TODO E07: Validar la transición con permiteTransicionA y exigir al menos una línea para pasar a EN_CURSO.
         //Validar la transición
@@ -168,7 +185,11 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
         return redondear(suma);
         //throw new UnsupportedOperationException("TODO E08");
     }
-
+    /**
+     * Calcula la antigüedad de la venta en días.
+     * @param hoy fecha utilizada para calcular la antigüedad.
+     * @return días transcurridos desde la venta.
+     */
     public long diasDesde(LocalDate hoy) {
         return ChronoUnit.DAYS.between(fecha, hoy);
     }
@@ -227,7 +248,10 @@ public class Venta implements Iterable<Venta.Linea>, Serializable {
             return Venta.this.cliente.nivel().aplicar(subtotal());
             //throw new UnsupportedOperationException("TODO E08");
         }
-
+        /**
+         * Obtiene la venta que contiene esta línea.
+         * @return venta propietaria de la línea.
+         */
         public Venta contenedor() {
             return Venta.this;
         }

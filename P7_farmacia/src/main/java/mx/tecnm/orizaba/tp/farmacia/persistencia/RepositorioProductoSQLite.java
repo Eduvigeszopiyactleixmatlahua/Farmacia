@@ -41,7 +41,10 @@ public class RepositorioProductoSQLite implements Repositorio<Producto, Sku> {
         return r.crear(Sku.parse(rs.getString("clave")), rs.getString("nombre"),
                 rs.getDouble("precio_base"), rs.getString("atributo"));
     };
-
+    /**
+     * Crea el repositorio de medicamentos en SQLite.
+     * @param bd conexión de la base de datos.
+     */
     public RepositorioProductoSQLite(ConexionSQLite bd) {
         this.bd = bd;
     }
@@ -49,30 +52,108 @@ public class RepositorioProductoSQLite implements Repositorio<Producto, Sku> {
     /** Atributo específico del subtipo, obtenido con pattern matching. */
     static String atributoDe(Producto e) {
         // TODO E13: switch (e) { case Producto.Patente x -> ...; ... } sin default (la jerarquía es sellada).
-        throw new UnsupportedOperationException("TODO E13");
+        return switch (e){
+            case Producto.Patente p ->  p.laboratorio();
+            case Producto.Generico g -> String.valueOf(g.concentracionMg());
+            case Producto.Biologico b-> String.valueOf(b.temperaturaMax());
+        };
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public void guardar(Producto e) {
         // TODO E13: INSERT ... ON CONFLICT(clave) DO UPDATE ... con PreparedStatement.
-        throw new UnsupportedOperationException("TODO E13");
+        //Instrucción SQL para insertar a actualizar
+        String sql = """
+                INSERT INTO producto (clave, tipo, nombre, precio_base, atributo)
+                VALUES (?,?,?,?,?)
+                ON CONFLICT(clave) DO UPDATE SET
+                tipo = excluded.tipo,
+                nombre = excluded.nombre,
+                precio_base = excluded.precio_base,
+                atributo = excluded.atributo
+                """;
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql)) {
+            //Asignar los cinco valores
+            ps.setString(1, e.clave().toString());
+            ps.setString(2, e.tipo());
+            ps.setString(3, e.nombre());
+            ps.setDouble(4, e.precioBase());
+            ps.setString(5, atributoDe(e));
+
+            //Ejecutar INSERT o UPDATE
+            ps.executeUpdate();
+        } catch (SQLException error) {
+            throw new PersistenciaException("Error al guardar el producto", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public Optional<Producto> buscar(Sku clave) {
         // TODO E13: SELECT por clave; mapear con mapeador si hay fila.
-        throw new UnsupportedOperationException("TODO E13");
+        String sql = """
+                SELECT clave, tipo, nombre, precio_base, atributo
+                FROM producto
+                WHERE clave = ?
+                """;
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql)){
+            ps.setString(1, clave.toString());
+            //Ejecutar la consulta
+            try (ResultSet rs = ps.executeQuery()){
+                //Comprobar si existe una fila
+                if (rs.next()){
+                    //Convertir la fila en un producto
+                    Producto producto = mapeador.mapear(rs);
+                    return Optional.of(producto);
+                }
+                //No existe un producto con esa clave
+                return Optional.empty();
+            }
+        } catch (SQLException error){
+            throw new PersistenciaException("Error al buscar el producto", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public List<Producto> todos() {
         // TODO E13: SELECT ordenado por clave; mapear cada fila.
-        throw new UnsupportedOperationException("TODO E13");
+        List <Producto> productos = new ArrayList<>();
+        String sql = """
+        SELECT clave, tipo, nombre, precio_base, atributo
+        FROM producto
+        ORDER BY clave
+        """;
+        //Prepara y ejecuta la consulta
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            //Recorrer todas las filas
+                while (rs.next()){
+                    //Reconstruir el objeto y agregarlo
+                    productos.add(mapeador.mapear(rs));
+                }
+                return productos;
+        } catch (SQLException error){
+                throw new PersistenciaException("Error al consultar los productos", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public boolean eliminar(Sku clave) {
         // TODO E13: DELETE por clave; devolver si se afectó alguna fila.
-        throw new UnsupportedOperationException("TODO E13");
+        String sql = "DELETE FROM producto WHERE clave = ?";
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql)){
+            //Asignar la clave del producto
+            ps.setString(1, clave.toString());
+            //Eliminar
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0;
+        } catch (SQLException error){
+            throw new PersistenciaException("Error al eliminar el producto", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 }

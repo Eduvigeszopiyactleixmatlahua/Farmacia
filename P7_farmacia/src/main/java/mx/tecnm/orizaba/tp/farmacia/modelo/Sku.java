@@ -5,14 +5,34 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 /**
- * Objeto valor inmutable que identifica a un producto (formato {@code ABC-0001}).
- * <ul>
- *   <li>Encapsulamiento: {@code record} con constructor compacto que valida invariantes.</li>
- *   <li>Proceso: bloque de inicialización estática (véase {@code java_2_proceso/Proceso03}).</li>
- *   <li>Concurrencia: secuencias atómicas seguras entre hilos.</li>
- * </ul>
+ * Representa una clave SKU única de un medicamento.
+ *
+ * <p>Es un objeto valor inmutable implementado mediante
+ * un record, compuesto por un prefijo de tres letras
+ * mayúsculas y un número entero positivo.</p>
+ *
+ * <p>Su representación textual utiliza el formato
+ * {@code ABC-0001}.</p>
+ *
+ * <p>Implementa Comparable para ordenar claves y
+ * Serializable para permitir su serialización.</p>
+ *
+ * <p>Administra secuencias de identificación mediante
+ * ConcurrentHashMap y AtomicInteger, permitiendo
+ * operaciones atómicas entre múltiples hilos.</p>
+ *
+ * @param prefijo tres letras mayúsculas que identifican
+ *                el tipo de medicamento.
+ * @param numero número positivo que identifica
+ *               al producto dentro del prefijo.
+ *
+ * @see Comparable
+ * @see Serializable
+ * @see AtomicInteger
  */
+
 public record Sku(String prefijo, int numero) implements Comparable<Sku>, Serializable {
 
     private static final Map<String, AtomicInteger> SECUENCIAS;
@@ -21,6 +41,23 @@ public record Sku(String prefijo, int numero) implements Comparable<Sku>, Serial
         // Inicialización estática: se ejecuta una sola vez, al primer uso activo de la clase.
         SECUENCIAS = new ConcurrentHashMap<>();
     }
+
+    /**
+     * Valida los componentes de una clave SKU.
+     *
+     * <p>Comprueba que el número sea mayor que cero
+     * y que el prefijo contenga exactamente tres
+     * letras mayúsculas de la A a la Z.</p>
+     *
+     * <p>Si alguno de los valores es inválido,
+     * impide la construcción del objeto.</p>
+     *
+     * @param prefijo prefijo de tres letras mayúsculas.
+     * @param numero identificador entero positivo.
+     * @throws IllegalArgumentException si el prefijo
+     *         es nulo, tiene un formato incorrecto
+     *         o el número no es positivo.
+     */
 
     public Sku {
         // TODO E03: Validar que el prefijo tenga exactamente 3 letras mayúsculas y que el número sea positivo (IllegalArgumentException).
@@ -36,7 +73,11 @@ public record Sku(String prefijo, int numero) implements Comparable<Sku>, Serial
         //throw new UnsupportedOperationException("TODO E03");
     }
 
-    /** Genera la siguiente clave del prefijo indicado (operación atómica). */
+    /**
+     * Genera la siguiente clave del prefijo indicado (operación atómica).
+     * @param prefijo prefijo de tres letras del SKU.
+     * @return nueva clave SKU.
+     */
     public static Sku siguiente(String prefijo) {
         // TODO E03: Obtener (o crear) la secuencia del prefijo con computeIfAbsent e incrementarla atómicamente.
         AtomicInteger contador = SECUENCIAS.computeIfAbsent(prefijo,valorprefijo-> new AtomicInteger(0));
@@ -54,8 +95,11 @@ public record Sku(String prefijo, int numero) implements Comparable<Sku>, Serial
        contador.accumulateAndGet(clave.numero(), Math::max);
         //throw new UnsupportedOperationException("TODO E03");
     }
-
-    /** Convierte un texto {@code ABC-0001} en una clave. */
+    /**
+     * Convierte un texto {@code ABC-0001} en una clave.
+     * @param texto texto para búsqueda o conversión.
+     * @return clave SKU reconstruida.
+     */
     public static Sku parse(String texto) {
         // TODO E03: Validar el formato con la expresión [A-Z]{3}-\d{4,} y construir la clave.
 
@@ -86,6 +130,17 @@ public record Sku(String prefijo, int numero) implements Comparable<Sku>, Serial
         return Integer.compare(numero, otra.numero());
         //throw new UnsupportedOperationException("TODO E03");
     }
+
+    /**
+     * Obtiene la representación textual de la clave SKU.
+     *
+     * <p>Combina el prefijo con el número utilizando
+     * un guion como separador. El número se presenta
+     * con al menos cuatro dígitos, agregando ceros
+     * a la izquierda cuando es necesario.</p>
+     *
+     * @return clave SKU en formato {@code ABC-0001}.
+     */
 
     @Override
     public String toString() {

@@ -6,7 +6,11 @@ import java.io.Serial;
 public class PersistenciaException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
-
+    /**
+     * Crea una excepción de acceso a datos.
+     * @param mensaje texto informativo del evento.
+     * @param causa excepción que originó el error.
+     */
     public PersistenciaException(String mensaje, Throwable causa) {
         super(mensaje, causa);
     }

@@ -53,26 +53,87 @@ public final class ConexionSQLite implements AutoCloseable {
     }
 
     private final Connection conexion;
-
-    /** @param rutaArchivo archivo .db (se crea si no existe) */
+/**
+ * Crea la conexión SQLite y el esquema de tablas.
+ * @param rutaArchivo ruta de la base de datos SQLite.
+ */
     public ConexionSQLite(String rutaArchivo) {
         // TODO E13: Abrir jdbc:sqlite:<ruta>, activar PRAGMA foreign_keys = ON y crear el esquema.
-        throw new UnsupportedOperationException("TODO E13");
-    }
+       try {
+           //Conexión con SQLite
+           conexion = DriverManager.getConnection("jdbc:sqlite:" + rutaArchivo);
+           //Crear el Statement
+           try(Statement sentencia = conexion.createStatement()) {
+               sentencia.execute("PRAGMA foreign_keys = ON");
+               for (String sql : ESQUEMA){
+                sentencia.execute(sql);
+            }
+       }
 
+    } catch (SQLException e) {
+           throw new PersistenciaException("Error al inicializar SQLite", e);
+       }
+
+        //throw new UnsupportedOperationException("TODO E13");
+    }
+    /**
+     * Obtiene la conexión JDBC activa.
+     * @return conexión JDBC.
+     */
     public Connection conexion() {
         return conexion;
     }
 
     /**
      * Ejecuta un trabajo dentro de una transacción: confirma si termina bien y revierte ante error.
+     * @param <R> tipo genérico utilizado.
+     * @param trabajo operación SQL que se ejecutará.
+     * @return resultado producido por el trabajo SQL.
      */
     public <R> R enTransaccion(TrabajoSQL<R> trabajo) {
         // TODO E13: setAutoCommit(false); ejecutar; commit; ante SQLException rollback y PersistenciaException; finalmente setAutoCommit(true).
-        throw new UnsupportedOperationException("TODO E13");
+        try {
+            //Desactivar la confirmación automática
+            conexion.setAutoCommit(false);
+            //Ejecutar el trabajo
+            R resultado = trabajo.ejecutar(conexion);
+            //Confirmar con commit()
+            conexion.commit();
+            //Devolver el resultado
+            return resultado;
+
+        } catch (SQLException e){
+            try {
+                conexion.rollback();
+            } catch (SQLException errorRollback) {
+                e.addSuppressed(errorRollback);
+            }
+            throw new PersistenciaException("Error al ejecutar la transacción", e);
+
+        } catch(RuntimeException e) {
+            //Revertir si ocurre un error de ejecución
+            try {
+                conexion.rollback();
+            } catch (SQLException errorRollback) {
+                e.addSuppressed(errorRollback);
+            }
+            throw e;
+        } finally {
+            //Restaurar la confirmación automática
+            try {
+                conexion.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new PersistenciaException("Error al restaurar autocommit", e);
+            }
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     /** Interfaz funcional miembro: trabajo que puede lanzar {@link SQLException}. */
+    /**
+     * Operación SQL que puede lanzar una excepción.
+     * @param <R> tipo del resultado.
+     */
     @FunctionalInterface
     public interface TrabajoSQL<R> {
         R ejecutar(Connection c) throws SQLException;

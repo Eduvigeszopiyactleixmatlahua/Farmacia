@@ -17,7 +17,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * La UI del estudiante debe ofrecer, como mínimo, lo que aquí se muestra.
  */
 public final class DemoModelo {
-
+    /**
+     * Ejecuta la demostración del modelo.
+     * @param args argumentos de línea de comandos.
+     * @throws Exception si la operación no puede completarse.
+     */
     public static void main(String[] args) throws Exception {
         Path bd = args.length > 0 ? Path.of(args[0]) : Files.createTempFile("farmacia", ".db");
         AtomicReference<LocalDate> hoy = new AtomicReference<>(LocalDate.now());

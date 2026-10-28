@@ -12,11 +12,20 @@ public interface Vendible {
 
     /** Constante de interfaz: implícitamente {@code public static final}. */
     double TASA_IMPUESTO = 0.16;
-
+    /**
+     * Obtiene la clave del producto.
+     * @return clave SKU.
+     */
     Sku clave();
-
+    /**
+     * Obtiene el nombre del producto.
+     * @return nombre del producto.
+     */
     String nombre();
-
+    /**
+     * Obtiene el precio base del producto.
+     * @return precio unitario.
+     */
     double precioBase();
 
     /** Tarifa (sin impuestos) para la cantidad de piezas indicada. */

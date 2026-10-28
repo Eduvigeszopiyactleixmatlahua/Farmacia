@@ -11,9 +11,18 @@ import java.util.function.Predicate;
  */
 @FunctionalInterface
 public interface Regla<T> {
-
+    /**
+     * Evalúa si el elemento cumple la condición.
+     * @param t elemento que será evaluado.
+     * @return {@code true} cuando cumple la condición.
+     */
     boolean evaluar(T t);
+    /**
+     * Combina esta regla con otra mediante AND.
 
+     * @param otra regla que se combinará.
+     * @return regla que exige ambas condiciones.
+     */
     default Regla<T> y(Regla<? super T> otra) {
         // TODO E11: Devolver la lambda t -> evaluar(t) && otra.evaluar(t) (validar otra no nula).
         //Validar que otra no sea null
@@ -22,7 +31,12 @@ public interface Regla<T> {
         return t -> evaluar(t) && otra.evaluar(t);
         //throw new UnsupportedOperationException("TODO E11");
     }
+    /**
+     * Combina esta regla con otra mediante OR.
 
+     * @param otra regla que se combinará.
+     * @return regla que acepta cualquiera de las condiciones.
+     */
     default Regla<T> o(Regla<? super T> otra) {
         // TODO E11: Devolver la lambda t -> evaluar(t) || otra.evaluar(t).
         //Validar que otra no sea null
@@ -31,7 +45,11 @@ public interface Regla<T> {
         return t -> evaluar(t) || otra.evaluar(t);
         //throw new UnsupportedOperationException("TODO E11");
     }
+    /**
+     * Invierte el resultado de esta regla.
 
+     * @return regla con resultado invertido.
+     */
     default Regla<T> negar() {
         // TODO E11: Devolver la lambda t -> !evaluar(t).
         return t -> !evaluar(t);
@@ -46,8 +64,12 @@ public interface Regla<T> {
     static <T> Regla<T> todas() {
         return t -> true;
     }
-
-    /** Adaptador desde {@link Predicate}. */
+    /**
+     * Adaptador desde {@link Predicate}.
+     * @param <T> tipo de elemento evaluado.
+     * @param p predicado utilizado para crear la regla.
+     * @return evento creado o regla adaptada.
+     */
     static <T> Regla<T> de(Predicate<? super T> p) {
         return p::test;
     }

@@ -15,7 +15,10 @@ public abstract class TareaPeriodica implements Runnable {
     private volatile boolean activa;
     private Thread hilo;
     private volatile long ciclos;
-
+    /**
+     * Configura el período de ejecución de la tarea.
+     * @param periodoMs intervalo entre ciclos en milisegundos.
+     */
     protected TareaPeriodica(long periodoMs) {
         if (periodoMs <= 0) {
             throw new IllegalArgumentException("Periodo inválido: " + periodoMs);
@@ -23,7 +26,10 @@ public abstract class TareaPeriodica implements Runnable {
         this.periodoMs = periodoMs;
     }
 
-    /** Arranca el hilo (demonio) con el nombre indicado. */
+    /**
+     * Arranca el hilo (demonio) con el nombre indicado.
+     * @param nombreHilo nombre del hilo que se iniciará.
+     */
     public final synchronized void iniciar(String nombreHilo) {
         // TODO E12: Si ya está activa lanzar IllegalStateException; crear new Thread(this, nombreHilo), marcarlo demonio, activar y start().
         //Evitar comenzar una tarea ya activa
@@ -41,7 +47,11 @@ public abstract class TareaPeriodica implements Runnable {
         //throw new UnsupportedOperationException("TODO E12");
     }
 
-    /** Solicita la detención y espera a que el hilo termine. */
+    /**
+     * Solicita la detención y espera a que el hilo termine.
+     * @throws InterruptedException si la operación no puede completarse.
+     * @throws InterruptedException si se interrumpe la operación.
+     */
     public final void detener() throws InterruptedException {
         // TODO E12: Bajar la bandera, interrumpir el hilo y esperar con join() (si existe).
         //Hilo no debe repetir el trabajo
@@ -55,11 +65,18 @@ public abstract class TareaPeriodica implements Runnable {
         }
         //throw new UnsupportedOperationException("TODO E12");
     }
-
+    /**
+     * Indica si el hilo periódico sigue activo.
+     * @return {@code true} si el hilo está activo.
+     */
     public final boolean activa() {
         return activa;
     }
 
+    /**
+     * Cuenta los ciclos ejecutados.
+     * @return número de ciclos ejecutados.
+     */
     public final long ciclos() {
         return ciclos;
     }

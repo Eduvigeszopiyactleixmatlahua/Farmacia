@@ -12,6 +12,12 @@ import mx.tecnm.orizaba.tp.farmacia.modelo.Producto;
  */
 @FunctionalInterface
 public interface FabricaElemento<E extends Producto, A> {
-
+    /**
+     * Construye un medicamento con sus atributos.
+     * @param nombre nombre del producto o cliente.
+     * @param precioBase precio unitario del medicamento.
+     * @param atributo dato específico del subtipo.
+     * @return instancia construida.
+     */
     E crear(String nombre, double precioBase, A atributo);
 }

@@ -26,12 +26,17 @@ public class Anaquel implements Iterable<Producto>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Map<Sku, Producto> elementos = new LinkedHashMap<>();
-
-    /** Constructor con número variable de argumentos. */
+    /**
+     * Constructor con número variable de argumentos.
+     * @param iniciales medicamentos iniciales del catálogo.
+     */
     public Anaquel(Producto... iniciales) {
         agregar(iniciales);
     }
-
+    /**
+     * Agrega medicamentos y rechaza claves duplicadas.
+     * @param nuevos medicamentos que se añadirán.
+     */
     public final void agregar(Producto... nuevos) {
         // TODO E09: Recorrer los argumentos; rechazar nulos y claves duplicadas (ReglaNegocioException); usar putIfAbsent.
         for (Producto producto : nuevos){
@@ -49,19 +54,38 @@ public class Anaquel implements Iterable<Producto>, Serializable {
         //throw new UnsupportedOperationException("TODO E09");
     }
 
+    /**
+     * Busca un producto del catálogo mediante su clave SKU.
+     *
+     * @param clave identificador del producto que se desea buscar.
+     * @return un Optional con el producto encontrado,
+     *         o vacío cuando la clave no existe.
+     */
+
     public Optional<Producto> buscar(Sku clave) {
         return Optional.ofNullable(elementos.get(clave));
     }
-
+    /**
+     * Elimina un medicamento por su clave.
+     * @param clave clave que identifica al registro.
+     * @return {@code true} si se eliminó el producto.
+     */
     public boolean retirar(Sku clave) {
         return elementos.remove(clave) != null;
     }
-
+    /**
+     * Cuenta los productos del catálogo.
+     * @return cantidad de medicamentos.
+     */
     public int tamanio() {
         return elementos.size();
     }
+/**
+ * Filtrado con la interfaz funcional propia {@link Regla}.
+ * @param regla condición para filtrar los elementos.
+ * @return productos que cumplen la regla.
+ */
 
-    /** Filtrado con la interfaz funcional propia {@link Regla}. */
     public List<Producto> filtrar(Regla<? super Producto> regla) {
         // TODO E09: Stream de los valores filtrado con regla::evaluar y recolectado con toList().
         //Obtener los productos almacenados en el mapa elementos

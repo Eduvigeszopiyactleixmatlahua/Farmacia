@@ -16,7 +16,10 @@ public class RepositorioClienteSQLite implements Repositorio<Cliente, Integer> {
     private final ConexionSQLite bd;
     private final MapeadorFila<Cliente> mapeador = rs -> new Cliente(rs.getInt("id"),
             rs.getString("nombre"), rs.getString("correo"), Nivel.valueOf(rs.getString("nivel")));
-
+    /**
+     * Crea el repositorio de clientes en SQLite.
+     * @param bd conexión de la base de datos.
+     */
     public RepositorioClienteSQLite(ConexionSQLite bd) {
         this.bd = bd;
     }
@@ -24,24 +27,90 @@ public class RepositorioClienteSQLite implements Repositorio<Cliente, Integer> {
     @Override
     public void guardar(Cliente a) {
         // TODO E13: Upsert por id con PreparedStatement.
-        throw new UnsupportedOperationException("TODO E13");
+        //SQL para insertar cliente
+        String sql = """
+            INSERT INTO cliente (id, nombre, correo, nivel)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                nombre = excluded.nombre,
+                correo = excluded.correo,
+                nivel = excluded.nivel
+            """;
+
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql)){
+            //Asignar los parámetros.
+            ps.setInt(1, a.id());
+            ps.setString(2, a.nombre());
+            ps.setString(3, a.correo());
+            ps.setString(4, a.nivel().name());
+            ps.executeUpdate();
+        } catch (SQLException error){
+            throw new PersistenciaException("Error al guardar el cliente", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public Optional<Cliente> buscar(Integer id) {
         // TODO E13: SELECT por id.
-        throw new UnsupportedOperationException("TODO E13");
+        String sql = """
+               SELECT id, nombre, correo, nivel
+               FROM cliente
+               WHERE id = ?               
+                """;
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql)){
+            ps.setInt(1, id);
+            //Ejecutar la consulta
+            try (ResultSet rs = ps.executeQuery()) {
+                //Comprobar si existe una fila
+                if (rs.next()){
+                    return Optional.of(mapeador.mapear(rs));
+                }
+                return Optional.empty();
+            }
+        } catch (SQLException error) {
+            throw new PersistenciaException("Error al buscar el cliente", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public List<Cliente> todos() {
         // TODO E13: SELECT ordenado por id.
-        throw new UnsupportedOperationException("TODO E13");
+        //Crear lista vacia
+        List  <Cliente> clientes = new ArrayList<>();
+        String sql = """
+            SELECT id, nombre, correo, nivel
+            FROM cliente
+            ORDER BY id
+            """;
+
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql); ResultSet rs = ps.executeQuery()){
+            //Recorre las filas
+            while (rs.next()){
+                clientes.add(mapeador.mapear(rs));
+            }
+            return clientes;
+        } catch (SQLException error) {
+            throw new PersistenciaException("Error al consultar los clientes", error);
+        }
+        //throw new UnsupportedOperationException("TODO E13");
     }
 
     @Override
     public boolean eliminar(Integer id) {
         // TODO E13: DELETE por id.
-        throw new UnsupportedOperationException("TODO E13");
+        String sql = "DELETE FROM cliente WHERE id = ?";
+        try (PreparedStatement ps = bd.conexion().prepareStatement(sql)){
+            //Asignar identificador
+            ps.setInt(1, id);
+            //Eliminar
+            int filaseliminadas = ps.executeUpdate();
+            return filaseliminadas > 0;
+        } catch (SQLException error) {
+            throw new PersistenciaException("Error al eliminar el cliente", error);
+        }
+
+        //throw new UnsupportedOperationException("TODO E13");
     }
 }

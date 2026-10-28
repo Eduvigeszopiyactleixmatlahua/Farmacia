@@ -12,7 +12,10 @@ public enum Estado {
     Estado(String etiqueta) {
         this.etiqueta = etiqueta;
     }
-
+    /**
+     * Obtiene el nombre visible del estado.
+     * @return etiqueta legible.
+     */
     public String etiqueta() {
         return etiqueta;
     }

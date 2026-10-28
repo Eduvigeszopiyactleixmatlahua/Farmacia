@@ -7,9 +7,15 @@ package mx.tecnm.orizaba.tp.farmacia.modelo;
  * (véase {@code java_5_lambdas/a_interfaces_default/Default3}).
  */
 public interface RequiereReceta {
-
+    /**
+     * Obtiene el tipo de receta requerido.
+     * @return tipo de receta requerida.
+     */
     String tipoReceta();
-
+    /**
+     * Describe la receta necesaria.
+     * @return descripción breve de la capacidad.
+     */
     default String descripcionCorta() {
         // TODO E05: Devolver "Receta: " concatenado con el valor de tipoReceta().
         return "Receta: " + tipoReceta();

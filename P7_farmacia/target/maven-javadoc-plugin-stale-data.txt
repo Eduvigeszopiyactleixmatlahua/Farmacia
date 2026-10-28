@@ -1,0 +1,61 @@
+-J-Duser.language=
+-J-Duser.country=
+@options
+@packages
+-classpath
+'C:/Users/eduvi/.m2/repository/org/xerial/sqlite-jdbc/3.46.1.3/sqlite-jdbc-3.46.1.3.jar;C:/Users/eduvi/.m2/repository/com/formdev/flatlaf/3.7.2/flatlaf-3.7.2.jar'
+-encoding
+'UTF-8'
+-protected
+--release
+21
+-sourcepath
+'C:/Users/eduvi/Desktop/Maestria/Tecnologias de programacion/ProyectoU2/P7_farmacia/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2026. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'C:/Users/eduvi/Desktop/Maestria/Tecnologias de programacion/ProyectoU2/P7_farmacia/target/reports/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Miniproyecto 7 - Punto de Venta y Surtido de una Farmacia 1.0.0 API'
+-use
+-version
+-windowtitle
+'Miniproyecto 7 - Punto de Venta y Surtido de una Farmacia 1.0.0 API'
+mx.tecnm.orizaba.tp.farmacia.app
+mx.tecnm.orizaba.tp.farmacia.concurrencia
+mx.tecnm.orizaba.tp.farmacia.eventos
+mx.tecnm.orizaba.tp.farmacia.funcional
+mx.tecnm.orizaba.tp.farmacia.modelo
+mx.tecnm.orizaba.tp.farmacia.persistencia
+mx.tecnm.orizaba.tp.farmacia.servicio
+mx.tecnm.orizaba.tp.farmacia.ui
+C:\Users\eduvi\.m2\repository\org\xerial\sqlite-jdbc\3.46.1.3\sqlite-jdbc-3.46.1.3.jar = 1791083235335
+C:\Users\eduvi\.m2\repository\com\formdev\flatlaf\3.7.2\flatlaf-3.7.2.jar = 1792958247252
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\src\main\java = 1790907819858
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\allclasses-index.html = 1793156987321
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\allpackages-index.html = 1793156987328
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\constant-values.html = 1793156986910
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\copy.svg = 1793156987433
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\element-list = 1793156986792
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\help-doc.html = 1793156987416
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\index-all.html = 1793156987399
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\index.html = 1793156987265
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\link.svg = 1793156987436
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\member-search-index.js = 1793156987340
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\module-search-index.js = 1793156987332
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\overview-summary.html = 1793156987409
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\overview-tree.html = 1793156987261
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\package-search-index.js = 1793156987334
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\script.js = 1793156987430
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\search-page.js = 1793156987443
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\search.html = 1793156987404
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\search.js = 1793156987440
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\serialized-form.html = 1793156986963
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\stylesheet.css = 1793156987426
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\tag-search-index.js = 1793156987342
+C:\Users\eduvi\Desktop\Maestria\Tecnologias de programacion\ProyectoU2\P7_farmacia\target\reports\apidocs\type-search-index.js = 1793156987335

@@ -9,10 +9,17 @@ package mx.tecnm.orizaba.tp.farmacia.eventos;
  */
 @FunctionalInterface
 public interface OyenteEvento {
-
+    /**
+     * Recibe la notificación de un evento.
+     * @param evento evento que se notifica.
+     */
     void notificar(Evento evento);
 
-    /** Composición secuencial de oyentes (función de orden superior). */
+    /**
+     * Composición secuencial de oyentes (función de orden superior).
+     * @param siguiente oyente que se invocará después.
+     * @return oyente compuesto.
+     */
     default OyenteEvento luego(OyenteEvento siguiente) {
         // TODO E11: Devolver una lambda que notifique primero a this y después a siguiente.
         return evento -> {

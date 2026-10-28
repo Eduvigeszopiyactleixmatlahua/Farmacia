@@ -25,6 +25,12 @@
       <version>21.0.5</version>
     </dependency>
     -->
+    <!-- Apariencia moderna para Java Swing -->
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <version>3.7.2</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

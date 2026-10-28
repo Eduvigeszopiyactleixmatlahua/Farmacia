@@ -16,16 +16,25 @@ public enum Nivel {
         this.etiqueta = etiqueta;
         this.descuento = descuento;
     }
-
+    /**
+     * Obtiene la etiqueta visible del nivel.
+     * @return etiqueta legible.
+     */
     public String etiqueta() {
         return etiqueta;
     }
-
+    /**
+     * Obtiene la proporción de descuento del nivel.
+     * @return proporción de descuento.
+     */
     public double descuento() {
         return descuento;
     }
-
-    /** Aplica el descuento del nivel a un monto, redondeando a 2 decimales. */
+/**
+ * Aplica el descuento del nivel a un monto, redondeando a 2 decimales.
+ * @param monto importe antes del descuento.
+ * @return importe después del descuento.
+ */
     public double aplicar(double monto) {
         // TODO E06: Restar el porcentaje de descuento al monto y redondear a 2 decimales.
         //Calcular el monto con descuento

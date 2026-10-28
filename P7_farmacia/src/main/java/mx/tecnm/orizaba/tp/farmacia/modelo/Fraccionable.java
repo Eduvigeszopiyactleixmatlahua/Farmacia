@@ -7,9 +7,15 @@ package mx.tecnm.orizaba.tp.farmacia.modelo;
  * (véase {@code java_5_lambdas/a_interfaces_default/Default3}).
  */
 public interface Fraccionable {
-
+    /**
+     * Obtiene el número de dosis por envase.
+     * @return cantidad de dosis.
+     */
     int dosisPorEnvase();
-
+    /**
+     * Describe las dosis por envase.
+     * @return descripción breve de la capacidad.
+     */
     default String descripcionCorta() {
         // TODO E05: Devolver "Dosis por envase: " concatenado con el valor de dosisPorEnvase().
         return "Dosis por envase: " + dosisPorEnvase();

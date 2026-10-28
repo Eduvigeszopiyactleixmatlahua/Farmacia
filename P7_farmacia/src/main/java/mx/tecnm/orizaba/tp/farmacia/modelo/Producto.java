@@ -44,10 +44,40 @@ public abstract sealed class Producto implements Vendible, Serializable
         INSTANCIAS_CREADAS.incrementAndGet();
     }
 
+/**
+ * Construye un producto nuevo con una clave SKU generada.
+ *
+ * <p>Genera la siguiente clave disponible para el prefijo
+ * indicado y delega la inicialización al constructor
+ * que recibe una clave existente.</p>
+ *
+ * @param prefijo prefijo de tres letras del medicamento.
+ * @param nombre nombre del producto.
+ * @param precioBase precio unitario del medicamento.
+ */
+
     /** Constructor para objetos nuevos: genera la clave y encadena con {@code this(...)}. */
     protected Producto(String prefijo, String nombre, double precioBase) {
         this(Sku.siguiente(prefijo), nombre, precioBase);
     }
+
+/**
+ * Construye un producto con una clave SKU conocida.
+ *
+ * <p>Comprueba que la clave no sea nula, la registra
+ * en la secuencia de identificadores y valida
+ * el nombre y precio base mediante los setters.</p>
+ *
+ * <p>Este constructor también permite reconstruir
+ * productos recuperados de la persistencia SQLite.</p>
+ *
+ * @param clave identificador SKU del medicamento.
+ * @param nombre nombre del producto.
+ * @param precioBase precio base unitario.
+ * @throws NullPointerException si la clave es nula.
+ * @throws ReglaNegocioException si el nombre o
+ *         el precio base no cumple las validaciones.
+ */
 
     /** Constructor para objetos reconstruidos (persistencia) con clave conocida. */
     protected Producto(Sku clave, String nombre, double precioBase) {
@@ -60,6 +90,13 @@ public abstract sealed class Producto implements Vendible, Serializable
         setPrecioBase(precioBase);
         //throw new UnsupportedOperationException("TODO E04");
     }
+
+    /**
+     * Consulta el contador de inicializaciones de productos.
+     *
+     * @return cantidad de inicializaciones de instancias
+     *         contabilizadas por la clase Producto.
+     */
 
     public static int instanciasCreadas() {
         return INSTANCIAS_CREADAS.get();
@@ -184,6 +221,22 @@ public abstract sealed class Producto implements Vendible, Serializable
             return laboratorio;
         }
 
+        /**
+         * Calcula la tarifa de un medicamento para cierta cantidad.
+         *
+         * <p>Valida que las unidades sean positivas, incrementa
+         * el contador de cotizaciones y delega el cálculo
+         * al método {@link #calcularTarifa(int)}.</p>
+         *
+         * <p>El resultado se redondea a dos posiciones decimales
+         * mediante Math.round.</p>
+         *
+         * @param unidades cantidad de piezas solicitadas.
+         * @return importe calculado y redondeado a dos decimales.
+         * @throws ReglaNegocioException si las unidades
+         *         son menores o iguales a cero.
+         */
+
         @Override
         protected double calcularTarifa(int unidades) {
             // TODO E05: Patente: precio por pieza. Fórmula: precioBase() * unidades
@@ -307,6 +360,16 @@ public abstract sealed class Producto implements Vendible, Serializable
         public int temperaturaMax() {
             return temperaturaMax;
         }
+
+        /**
+         * Calcula la tarifa del medicamento de patente.
+         *
+         * <p>Multiplica el precio base por las unidades
+         * solicitadas, sin aplicar descuentos adicionales.</p>
+         *
+         * @param unidades cantidad de piezas.
+         * @return importe calculado del medicamento.
+         */
 
         @Override
         protected double calcularTarifa(int unidades) {

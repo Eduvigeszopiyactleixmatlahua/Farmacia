@@ -67,7 +67,11 @@ public final class PruebasModelo {
         }
         throw new AssertionError("se esperaba " + tipo.getSimpleName());
     }
-
+    /**
+     * Ejecuta las pruebas de aceptación del modelo.
+     * @param args argumentos de línea de comandos.
+     * @throws Exception si la operación no puede completarse.
+     */
     public static void main(String[] args) throws Exception {
         Path tmp = Files.createTempDirectory("pruebas-farmacia");
         System.out.println("Pruebas del modelo – Farmacia");
