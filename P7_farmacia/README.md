@@ -196,11 +196,44 @@ El repositorio incluye archivos para revisar y editar el modelo y la arquitectur
 
 Agregar **capturas reales de la aplicación en ejecución** en la carpeta `docs/capturas/`, preferentemente en formato PNG. Se recomiendan al menos las siguientes:
 
-- [ ] `01-inicio.png`: indicadores y gráficas de la pantalla Inicio.
-- [ ] `02-inventario.png`: tabla con productos de los tres tipos.
-- [ ] `03-clientes.png`: clientes registrados.
-- [ ] `04-ventas.png`: ventas y sus estados.
-- [ ] `05-respaldos.png`: exportación o verificación de un respaldo.
+
+## Capturas de pantalla
+
+A continuación se muestran las principales interfaces del Sistema de Gestión de Farmacia, desarrollado en Java 21 utilizando Swing y FlatLaf.
+
+
+## Capturas de pantalla del sistema
+
+El sistema de gestión de farmacia cuenta con una interfaz gráfica desarrollada en Java Swing y FlatLaf, que permite administrar las principales operaciones de una farmacia.
+
+### Pantalla de inicio
+
+Panel principal del sistema, desde el cual se puede acceder a los diferentes módulos.
+
+![Pantalla de inicio](Imagenes/Inicio.png)
+
+### Gestión de inventario
+
+Permite visualizar y administrar los medicamentos registrados en el sistema.
+
+![Gestión de inventario](Imagenes/Inventario.png)
+
+### Gestión de clientes
+
+Interfaz para consultar y administrar la información de los clientes.
+
+![Gestión de clientes](Imagenes/Clientes.png)
+
+### Gestión de ventas
+
+Módulo para consultar y gestionar las ventas realizadas.
+![Gestión de ventas](Imagenes/Ventas.png)
+
+### Monitor del sistema
+Pantalla de monitoreo del sistema.
+
+![Monitor del sistema](Imagenes/Monitor.png)
+
 
 Una vez agregados los archivos, quitar los comentarios de las siguientes líneas para visualizar las imágenes directamente en GitHub:
 
