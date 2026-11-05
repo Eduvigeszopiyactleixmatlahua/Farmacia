@@ -234,6 +234,31 @@ Pantalla de monitoreo del sistema.
 
 ![Monitor del sistema](Imagenes/Monitor.png)
 
+### Interfaz de respaldos
+
+Permite administrar los respaldos de información
+de la farmacia, incluyendo medicamentos, clientes
+y ventas.
+
+![Interfaz de respaldos](Imagenes/Respaldos.png)
+
+### Exportar respaldo
+
+Permite seleccionar la ubicación y el nombre del
+archivo para guardar un respaldo de la información
+del sistema en formato `.farmacia`.
+
+![Exportar respaldo](Imagenes/Exportar_respaldo.png)
+### Verificar respaldo
+
+Al seleccionar el botón "Verificar respaldo", se abre
+una ventana para buscar y seleccionar un archivo
+con extensión `.farmacia` previamente generado.
+
+El archivo seleccionado podrá someterse al proceso
+de verificación implementado en el sistema.
+
+![Verificar respaldo](Imagenes/Verificar_respaldo.png)
 
 <!-- ![Pantalla Inicio](docs/capturas/01-inicio.png) -->
 <!-- ![Inventario](docs/capturas/02-inventario.png) -->
