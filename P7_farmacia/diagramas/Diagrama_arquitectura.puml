@@ -1,0 +1,294 @@
+@startuml
+' P7_farmacia - Arquitectura del sistema en PlantUML
+' Referencias: esquema DOT proporcionado por el profesor y
+' diagramas de clases del modelo/integral previamente aprobados.
+' Esta es una VISTA DE ARQUITECTURA, no sustituye el detalle de clases.
+' Los metodos heredados del esquema del profesor deben cotejarse
+' con la version de los .java que se entregara.
+
+title P7 - Punto de Venta y Surtido de una Farmacia\nArquitectura del sistema (Swing + FlatLaf + Java 21 + SQLite)
+
+set namespaceSeparator none
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam nodesep 35
+skinparam ranksep 55
+hide empty members
+
+' ------------------------------------------------------------------
+' 1. APLICACION Y PRESENTACION
+' ------------------------------------------------------------------
+package "app - punto de entrada" #F4F5F7 {
+  class InicioEscritorio <<entry point>> {
+    {static} +main(args : String[]) : void
+  }
+}
+
+package "ui - presentacion Swing + FlatLaf" #E9F1FF {
+  class VentanaPrincipal <<JFrame>> {
+    -farmacia : Farmacia
+    +VentanaPrincipal(farmacia : Farmacia)
+    -cargarProductos() : void
+    -registrarProducto() : void
+    -editarProducto() : void
+    -retirarProducto() : void
+  }
+  class PanelClientes <<JPanel>> {
+    -farmacia : Farmacia
+  }
+  class PanelVentas <<JPanel>> {
+    -farmacia : Farmacia
+  }
+  class PanelReportes <<JPanel>> {
+    -farmacia : Farmacia
+  }
+  class PanelMonitor <<JPanel>> {
+    -farmacia : Farmacia
+    -oyente : OyenteEvento
+  }
+  class PanelRespaldos <<JPanel>> {
+    -farmacia : Farmacia
+  }
+}
+
+' ------------------------------------------------------------------
+' 2. FACHADA Y MONITOR
+' ------------------------------------------------------------------
+package "servicio - casos de uso y fachada" #FFF2DA {
+  class Farmacia <<fachada>> {
+    {static} +PLAZO_DIAS : int = 2
+    -reloj : Supplier<LocalDate>
+    -catalogo : Anaquel
+    -clientes : Map<Integer, Cliente>
+    -registros : Map<Integer, Venta>
+    -repoElementos : Repositorio<Producto, Sku>
+    -repoClientes : Repositorio<Cliente, Integer>
+    -repoRegistros : Repositorio<Venta, Integer>
+    -oyentes : List<OyenteEvento>
+    -monitor : MonitorSurtido
+    +registrar(fabrica, nombre, precio, atributo) : Producto
+    +registrarCliente(nombre, correo, nivel) : Cliente
+    +abrir(idCliente : int) : Venta
+    +agregarLinea(idVenta, clave, unidades) : Linea
+    +iniciar(idVenta : int) : void
+    +cerrar(idVenta : int) : void
+    +cancelar(idVenta : int) : void
+    +ingresosPorTipo() : Map
+    +masDemandado() : Optional
+    +mejores(n : int) : List
+    +estadisticas() : DoubleSummaryStatistics
+    +describir(elemento : Producto) : String
+    +conteoPorEstado() : Map
+    +revisar() : int
+    +iniciarMonitor(periodoMs : long) : void
+    +detenerMonitor() : void
+    +suscribir(oyente : OyenteEvento) : void
+    +exportarRespaldo(archivo : Path) : void
+  }
+  class "Farmacia.MonitorSurtido" as MonitorSurtido <<inner final>> {
+    #ejecutarCiclo() : void
+  }
+}
+
+' ------------------------------------------------------------------
+' 3. SERVICIOS TRANSVERSALES
+' ------------------------------------------------------------------
+package "concurrencia" #FAEAF1 {
+  interface "Runnable (JDK)" as Runnable
+  abstract class TareaPeriodica {
+    -periodoMs : long
+    -activa : boolean <<volatile>>
+    -hilo : Thread
+    +iniciar(nombreHilo : String) : void
+    +detener() : void
+    +run() : void
+    {abstract} #ejecutarCiclo() : void
+  }
+}
+
+package "eventos" #F5ECFF {
+  interface OyenteEvento <<functional>> {
+    +notificar(evento : Evento) : void
+    +luego(siguiente : OyenteEvento) : OyenteEvento
+  }
+  class Evento <<record>> {
+    +tipo : TipoEvento
+    +mensaje : String
+    +instante : LocalDateTime
+    {static} +de(tipo : TipoEvento, mensaje : String) : Evento
+  }
+  enum TipoEvento {
+    ALTA
+    CAMBIO_ESTADO
+    ALERTA
+    CANCELACION_AUTOMATICA
+  }
+}
+
+package "funcional" #F0F5EB {
+  interface "FabricaElemento<E,A>" as FabricaElemento <<functional>> {
+    +crear(nombre : String, precioBase : double, atributo : A) : E
+  }
+  interface "Regla<T>" as Regla <<functional>> {
+    +evaluar(t : T) : boolean
+  }
+}
+
+' ------------------------------------------------------------------
+' 4. ACCESO A DATOS Y RESPALDOS
+' ------------------------------------------------------------------
+package "persistencia - JDBC y serializacion" #EFF3F7 {
+  interface "Repositorio<T,K>" as Repositorio {
+    +guardar(entidad : T) : void
+    +buscar(clave : K) : Optional<T>
+    +todos() : List<T>
+    +eliminar(clave : K) : boolean
+    +existe(clave : K) : boolean
+  }
+  interface "Repositorio.MapeadorFila<R>" as MapeadorFila <<member interface>> {
+    +mapear(rs : ResultSet) : R
+  }
+  class RepositorioProductoSQLite {
+    -bd : ConexionSQLite
+    {static} -RECONSTRUCTORES : Map
+    +guardar(entidad : Producto) : void
+    +buscar(clave : Sku) : Optional<Producto>
+    {static} ~atributoDe(elemento : Producto) : String
+  }
+  class RepositorioClienteSQLite {
+    -bd : ConexionSQLite
+    +guardar(entidad : Cliente) : void
+    +buscar(id : Integer) : Optional<Cliente>
+  }
+  class RepositorioVentaSQLite {
+    -bd : ConexionSQLite
+    -clientes : Repositorio<Cliente, Integer>
+    -elementos : Repositorio<Producto, Sku>
+    +guardar(entidad : Venta) : void
+    +buscar(id : Integer) : Optional<Venta>
+  }
+  class ConexionSQLite <<AutoCloseable>> {
+    {static} -ESQUEMA : String[]
+    -conexion : Connection
+    +ConexionSQLite(rutaArchivo : String)
+    +conexion() : Connection
+    +enTransaccion(trabajo : TrabajoSQL) : R
+    {static} ~cargarDriver() : void
+    +close() : void
+  }
+  interface "ConexionSQLite.TrabajoSQL<R>" as TrabajoSQL <<member interface>> {
+    +ejecutar(conexion : Connection) : R
+  }
+  class Respaldo <<utility>> {
+    {static} +exportar(archivo, catalogo, clientes, registros) : void
+    {static} +importar(archivo : Path) : Contenido
+  }
+  class "Respaldo.Contenido" as Contenido <<record>> {
+    +catalogo : Anaquel
+    +clientes : List<Cliente>
+    +registros : List<Venta>
+  }
+}
+
+' ------------------------------------------------------------------
+' 5. MODELO Y BASE DE DATOS - REPRESENTACION DE ARQUITECTURA
+'    (sus clases completas se muestran en el UML del modelo aprobado)
+' ------------------------------------------------------------------
+package "modelo - dominio" #ECF7ED {
+  class Anaquel
+  abstract class Producto <<sealed>>
+  class Cliente
+  class Venta
+  class Sku <<record>>
+}
+
+package "datos" #E8ECEF {
+  class "SQLite (.db)" as SQLite <<database>> {
+    producto
+    cliente
+    venta
+    venta_linea
+  }
+}
+
+' ------------------------------------------------------------------
+' 6. DEPENDENCIAS Y RELACIONES REALES / DEL DIAGRAMA DEL PROFESOR
+' ------------------------------------------------------------------
+' Puesta en marcha
+InicioEscritorio ..> ConexionSQLite : inicializa
+InicioEscritorio ..> Farmacia : construye
+InicioEscritorio ..> VentanaPrincipal : abre
+
+' UI se comunica con fachada, no directamente con JDBC
+VentanaPrincipal --> Farmacia : casos de uso
+VentanaPrincipal ..> PanelClientes : crea
+VentanaPrincipal ..> PanelVentas : crea
+VentanaPrincipal ..> PanelReportes : crea
+VentanaPrincipal ..> PanelMonitor : crea
+VentanaPrincipal ..> PanelRespaldos : crea
+PanelClientes --> Farmacia
+PanelVentas --> Farmacia
+PanelReportes --> Farmacia
+PanelMonitor --> Farmacia
+PanelRespaldos --> Farmacia
+PanelMonitor ..> OyenteEvento : callback / suscripcion
+PanelMonitor ..> Evento : muestra
+
+' La fachada coordina dominio, repositorios, eventos y monitor
+Farmacia *-- "1" Anaquel : catalogo
+Farmacia --> "0..*" Cliente : clientes
+Farmacia --> "0..*" Venta : registros
+Farmacia --> "3" Repositorio : campos tipados
+Farmacia ..> FabricaElemento : registra productos
+Farmacia o-- "0..*" OyenteEvento : suscriptores
+Farmacia --> MonitorSurtido : administra
+Farmacia +-- MonitorSurtido : clase interna
+Farmacia ..> Respaldo : exporta / importa
+
+' Hilo cooperativo: implements Runnable, extends TareaPeriodica
+TareaPeriodica ..|> Runnable
+MonitorSurtido --|> TareaPeriodica
+
+' Eventos
+OyenteEvento ..> Evento : recibe
+Evento --> TipoEvento : tipo
+
+' Repositorios / JDBC
+RepositorioProductoSQLite ..|> Repositorio
+RepositorioClienteSQLite ..|> Repositorio
+RepositorioVentaSQLite ..|> Repositorio
+Repositorio +-- MapeadorFila : tipo miembro
+RepositorioProductoSQLite --> ConexionSQLite : bd
+RepositorioClienteSQLite --> ConexionSQLite : bd
+RepositorioVentaSQLite --> ConexionSQLite : bd
+RepositorioVentaSQLite --> Repositorio : clientes / elementos
+ConexionSQLite +-- TrabajoSQL : tipo miembro
+ConexionSQLite ..> SQLite : JDBC
+RepositorioProductoSQLite ..> Producto : persiste
+RepositorioClienteSQLite ..> Cliente : persiste
+RepositorioVentaSQLite ..> Venta : persiste
+
+' Respaldo serializa datos del dominio (complementario a SQLite)
+Respaldo ..> Contenido : retorna
+Contenido --> Anaquel : catalogo
+Contenido --> Cliente : clientes
+Contenido --> Venta : registros
+
+note right of VentanaPrincipal
+  En este proyecto la interfaz ya es
+  Swing + FlatLaf (no JavaFX ni Web).
+  El inventario se administra desde
+  la pantalla principal.
+end note
+
+note bottom of SQLite
+  Almacenamiento relacional:
+  cuatro tablas segun el esquema
+  de arquitectura del profesor.
+end note
+
+@enduml

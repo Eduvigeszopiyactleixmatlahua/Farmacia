@@ -1,0 +1,307 @@
+@startuml
+' Modelo Java extraido desde diagrama de ingenieria inversa suministrado.
+title P7_farmacia - Modelo completo (ingenieria inversa)
+set namespaceSeparator none
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+hide empty members
+package "modelo" {
+  class "Anaquel" as T_Anaquel {
+    {static} -serialVersionUID : long = 1L
+    -elementos : Map<Sku, Producto> <<final>>
+    +Anaquel(iniciales : Producto...)
+    +agregar(nuevos : Producto...) : void
+    +buscar(clave : Sku) : Optional<Producto>
+    +retirar(clave : Sku) : boolean
+    +tamanio() : int
+    +filtrar(regla : Regla<? super Producto>) : List<Producto>
+    +deTipo(tipo : Class<E>) : List<E>
+    +ordenados(criterio : Comparator<? super Producto>) : List<Producto>
+    {static} +porTarifa(unidades : int) : Comparator<Producto>
+    +resumen() : String
+    +iterator() : Iterator<Producto>
+  }
+  class "Anaquel.porTarifa.Anonima_1" as T_Anaquel_porTarifa_Anonima_1 <<anonymous>> {
+    +compare(a : Producto, b : Producto) : int
+  }
+  class "Anaquel.resumen.Acumulador" as T_Anaquel_resumen_Acumulador <<local>> {
+    ~cuenta : int
+    ~suma : double
+    ~minimo : double
+    ~maximo : double
+  }
+  class "Anaquel.Iterador" as T_Anaquel_Iterador <<inner>> {
+    -instantanea : List<Producto> <<final>>
+    -cursor : int
+    +hasNext() : boolean
+    +next() : Producto
+  }
+  class "Cliente" as T_Cliente {
+    {static} -CORREO : Pattern
+    -id : int
+    -nombre : String
+    -correo : String
+    -nivel : Nivel
+    +Cliente()
+    +Cliente(id : int, nombre : String, correo : String, nivel : Nivel)
+    +Cliente(id : int, nombre : String, correo : String)
+    +id() : int
+    +nombre() : String
+    +correo() : String
+    +nivel() : Nivel
+    +setNombre(nombre : String) : void
+    +setCorreo(correo : String) : void
+    +setNivel(nivel : Nivel) : void
+    +writeExternal(salida : ObjectOutput) : void throws IOException
+    +readExternal(entrada : ObjectInput) : void throws IOException
+    +equals(o : Object) : boolean
+    +hashCode() : int
+    +toString() : String
+  }
+  enum "Estado" as T_Estado {
+    ABIERTA
+    EN_CURSO
+    CERRADA
+    CANCELADA
+    -etiqueta : String <<final>>
+    ~Estado(etiqueta : String)
+    +etiqueta() : String
+    +permiteTransicionA(destino : Estado) : boolean
+    +esTerminal() : boolean
+    +toString() : String
+  }
+  interface "Fraccionable" as T_Fraccionable {
+    +dosisPorEnvase() : int
+    +descripcionCorta() : String
+  }
+  enum "Nivel" as T_Nivel {
+    GENERAL
+    AFILIADO
+    ADULTO_MAYOR
+    -etiqueta : String <<final>>
+    -descuento : double <<final>>
+    ~Nivel(etiqueta : String, descuento : double)
+    +etiqueta() : String
+    +descuento() : double
+    +aplicar(monto : double) : double
+    +toString() : String
+  }
+  abstract class "Producto" as T_Producto <<sealed>> {
+    {static} -serialVersionUID : long = 1L
+    {static} -INSTANCIAS_CREADAS : AtomicInteger
+    -clave : Sku <<final>>
+    -nombre : String
+    -precioBase : double
+    -creadoEn : LocalDateTime <<final>>
+    -cotizaciones : int <<transient>>
+    #Producto(prefijo : String, nombre : String, precioBase : double)
+    #Producto(clave : Sku, nombre : String, precioBase : double)
+    {static} +instanciasCreadas() : int
+    +clave() : Sku
+    +nombre() : String
+    +precioBase() : double
+    +creadoEn() : LocalDateTime
+    +cotizaciones() : int
+    +setNombre(nombre : String) : void <<final>>
+    +setPrecioBase(precioBase : double) : void <<final>>
+    +tarifa(unidades : int) : double <<final>>
+    {abstract} #calcularTarifa(unidades : int) : double
+    {abstract} +copiar() : Producto
+    +tipo() : String
+    +equals(o : Object) : boolean
+    +hashCode() : int
+    +toString() : String
+  }
+  note right of T_Producto : permits Producto.Patente, Producto.Generico, Producto.Biologico
+  class "Producto.Patente" as T_Producto_Patente <<final, static nested>> {
+    {static} -serialVersionUID : long = 1L
+    {static} +PREFIJO : String = "PAT"
+    -laboratorio : String <<final>>
+    +Patente(nombre : String, precioBase : double, laboratorio : String)
+    +Patente(clave : Sku, nombre : String, precioBase : double, laboratorio : String)
+    {static} -validar(laboratorio : String) : String
+    +laboratorio() : String
+    #calcularTarifa(unidades : int) : double
+    +copiar() : Patente
+    +tipoReceta() : String
+    +toString() : String
+  }
+  class "Producto.Generico" as T_Producto_Generico <<final, static nested>> {
+    {static} -serialVersionUID : long = 1L
+    {static} +PREFIJO : String = "GEN"
+    -concentracionMg : int <<final>>
+    +Generico(nombre : String, precioBase : double, concentracionMg : int)
+    +Generico(clave : Sku, nombre : String, precioBase : double, concentracionMg : int)
+    {static} -validar(concentracionMg : int) : int
+    +concentracionMg() : int
+    #calcularTarifa(unidades : int) : double
+    +copiar() : Generico
+    +dosisPorEnvase() : int
+    +toString() : String
+  }
+  class "Producto.Biologico" as T_Producto_Biologico <<final, static nested>> {
+    {static} -serialVersionUID : long = 1L
+    {static} +PREFIJO : String = "BIO"
+    -temperaturaMax : int <<final>>
+    +Biologico(nombre : String, precioBase : double, temperaturaMax : int)
+    +Biologico(clave : Sku, nombre : String, precioBase : double, temperaturaMax : int)
+    {static} -validar(temperaturaMax : int) : int
+    +temperaturaMax() : int
+    #calcularTarifa(unidades : int) : double
+    +copiar() : Biologico
+    +tipoReceta() : String
+    +dosisPorEnvase() : int
+    +descripcionCorta() : String
+    +toString() : String
+  }
+  class "ReglaNegocioException" as T_ReglaNegocioException <<exception>> {
+    {static} -serialVersionUID : long = 1L
+    +ReglaNegocioException(mensaje : String)
+  }
+  interface "RequiereReceta" as T_RequiereReceta {
+    +tipoReceta() : String
+    +descripcionCorta() : String
+  }
+  class "Sku" as T_Sku <<record>> {
+    -prefijo : String <<final>>
+    -numero : int <<final>>
+    {static} -SECUENCIAS : Map<String, AtomicInteger>
+    +Sku(prefijo : String, numero : int)
+    {static} +siguiente(prefijo : String) : Sku
+    {static} +registrar(clave : Sku) : void
+    {static} +parse(texto : String) : Sku
+    +compareTo(otra : Sku) : int
+    +toString() : String
+  }
+  interface "Vendible" as T_Vendible {
+    {static} +TASA_IMPUESTO : double <<final>>
+    +clave() : Sku
+    +nombre() : String
+    +precioBase() : double
+    +tarifa(unidades : int) : double
+    +tarifaConImpuesto(unidades : int) : double
+    {static} +porNombre() : Comparator<Vendible>
+  }
+  class "Venta" as T_Venta {
+    {static} -serialVersionUID : long = 1L
+    {static} -SECUENCIA : AtomicInteger = new AtomicInteger()
+    -id : int <<final>>
+    -cliente : Cliente <<final>>
+    -fecha : LocalDate <<final>>
+    -estado : Estado
+    -lineas : List<Linea> <<final>>
+    +Venta(cliente : Cliente)
+    +Venta(id : int, cliente : Cliente, fecha : LocalDate)
+    +id() : int
+    +cliente() : Cliente
+    +fecha() : LocalDate
+    +estado() : Estado
+    +agregar(elemento : Producto, unidades : int) : Linea
+    +quitar(clave : Sku) : boolean
+    +cambiarEstado(destino : Estado) : void
+    +iniciar() : void
+    +cerrar() : void
+    +cancelar() : void
+    +restaurarEstado(estado : Estado) : void
+    +lineas() : List<Linea>
+    +subtotal() : double
+    +total() : double
+    +diasDesde(hoy : LocalDate) : long
+    +iterator() : Iterator<Linea>
+    {static} -redondear(v : double) : double
+    +toString() : String
+  }
+  class "Venta.Linea" as T_Venta_Linea <<final, inner>> {
+    {static} -serialVersionUID : long = 1L
+    -elemento : Producto <<final>>
+    -unidades : int <<final>>
+    -Linea(elemento : Producto, unidades : int)
+    +elemento() : Producto
+    +unidades() : int
+    +subtotal() : double
+    +importe() : double
+    +contenedor() : Venta
+    +toString() : String
+  }
+}
+
+package "funcional (contrato usado por modelo)" {
+  interface "Regla<T>" as F_Regla <<functional>> {
+    +evaluar(t : T) : boolean
+    +y(otra : Regla) : Regla
+    +o(otra : Regla) : Regla
+    +negar() : Regla
+  }
+}
+package "Java API (tipos externos)" {
+  interface "Iterable" as J_Iterable <<java.lang>>
+  interface "Serializable" as J_Serializable <<java.io>>
+  interface "Comparator" as J_Comparator <<java.util>>
+  interface "Iterator" as J_Iterator <<java.util>>
+  interface "Externalizable" as J_Externalizable <<java.io>>
+  interface "Comparable" as J_Comparable <<java.lang>>
+  class "RuntimeException" as J_RuntimeException <<java.lang>>
+}
+
+
+' Anidamiento lexico (notacion +-- tomada del profesor; NO es composicion)
+T_Producto +-- T_Producto_Patente : nested static
+T_Producto +-- T_Producto_Generico : nested static
+T_Producto +-- T_Producto_Biologico : nested static
+T_Venta +-- T_Venta_Linea : inner
+T_Anaquel +-- T_Anaquel_Iterador : inner
+
+' RELACIONES EXTRAIDAS DEL MODELO
+T_Anaquel ..|> J_Iterable
+T_Anaquel ..|> J_Serializable
+T_Anaquel --> T_Sku : elementos
+T_Anaquel "1" o-- "0..*" T_Producto : elementos
+T_Anaquel ..> F_Regla : firma de metodo
+T_Anaquel ..> T_Anaquel_porTarifa_Anonima_1 : crea en porTarifa
+T_Anaquel ..> T_Anaquel_resumen_Acumulador : crea en resumen
+T_Anaquel ..> T_Anaquel_Iterador : crea en iterator
+T_Anaquel ..> T_ReglaNegocioException : throw en agregar
+T_Anaquel_porTarifa_Anonima_1 ..|> J_Comparator
+T_Anaquel_porTarifa_Anonima_1 ..> T_Producto : firma de metodo
+T_Anaquel_Iterador ..|> J_Iterator
+T_Anaquel_Iterador --> T_Producto : instantanea
+T_Cliente ..|> J_Externalizable
+T_Cliente --> T_Nivel : nivel
+T_Cliente ..> T_ReglaNegocioException : throw en Cliente, throw en setNombre, throw en setCorreo, throw en readExternal
+T_Producto ..|> T_Vendible
+T_Producto ..|> J_Serializable
+T_Producto --> T_Sku : clave
+T_Producto ..> T_ReglaNegocioException : throw en setNombre, throw en setPrecioBase, throw en tarifa
+T_Producto_Patente --|> T_Producto
+T_Producto_Patente ..|> T_RequiereReceta
+T_Producto_Patente ..> T_Sku : firma de metodo
+T_Producto_Patente ..> T_ReglaNegocioException : throw en validar
+T_Producto_Generico --|> T_Producto
+T_Producto_Generico ..|> T_Fraccionable
+T_Producto_Generico ..> T_Sku : firma de metodo
+T_Producto_Generico ..> T_ReglaNegocioException : throw en validar
+T_Producto_Biologico --|> T_Producto
+T_Producto_Biologico ..|> T_RequiereReceta
+T_Producto_Biologico ..|> T_Fraccionable
+T_Producto_Biologico ..> T_Sku : firma de metodo
+T_Producto_Biologico ..> T_ReglaNegocioException : throw en validar
+J_RuntimeException <|-- T_ReglaNegocioException
+T_Sku ..|> J_Comparable
+T_Sku ..|> J_Serializable
+T_Vendible ..> T_Sku : firma de metodo
+T_Venta ..|> J_Iterable
+T_Venta ..|> J_Serializable
+T_Venta --> T_Cliente : cliente
+T_Venta --> T_Estado : estado
+T_Venta "1" *-- "0..*" T_Venta_Linea : lineas
+T_Venta ..> T_Producto : firma de metodo
+T_Venta ..> T_Sku : firma de metodo
+T_Venta ..> T_ReglaNegocioException : throw en Venta, throw en agregar, throw en quitar, throw en cambiarEstado
+T_Venta_Linea ..|> J_Serializable
+T_Venta_Linea --> T_Producto : elemento
+T_Venta_Linea ..> T_Venta : firma de metodo
+T_Venta_Linea ..> T_ReglaNegocioException : throw en Linea
+@enduml

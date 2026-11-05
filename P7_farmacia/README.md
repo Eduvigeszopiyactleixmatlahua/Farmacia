@@ -235,8 +235,6 @@ Pantalla de monitoreo del sistema.
 ![Monitor del sistema](Imagenes/Monitor.png)
 
 
-Una vez agregados los archivos, quitar los comentarios de las siguientes líneas para visualizar las imágenes directamente en GitHub:
-
 <!-- ![Pantalla Inicio](docs/capturas/01-inicio.png) -->
 <!-- ![Inventario](docs/capturas/02-inventario.png) -->
 <!-- ![Clientes](docs/capturas/03-clientes.png) -->
