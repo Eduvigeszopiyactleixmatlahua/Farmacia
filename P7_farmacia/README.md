@@ -258,7 +258,7 @@ con extensión `.farmacia` previamente generado.
 El archivo seleccionado podrá someterse al proceso
 de verificación implementado en el sistema.
 
-![Verificar respaldo](Imagenes/Verificar_respaldo.png)
+![Verificar respaldo](Imagenes/Verificar_resplado.png)
 
 <!-- ![Pantalla Inicio](docs/capturas/01-inicio.png) -->
 <!-- ![Inventario](docs/capturas/02-inventario.png) -->
