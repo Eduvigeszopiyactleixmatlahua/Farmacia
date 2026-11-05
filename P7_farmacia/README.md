@@ -186,18 +186,13 @@ Para revisar la base con un cliente SQLite, se pueden ejecutar las consultas del
 
 El repositorio incluye archivos para revisar y editar el modelo y la arquitectura:
 
-- [Diagrama de clases del modelo](diagramas/modelo.png)
-- [Código fuente PlantUML del modelo](diagramas/modelo.puml)
-- [Diagrama de arquitectura](diagramas/arquitectura.png)
+- [Diagrama de clases del modelo](diagramas/Diagrama_Modelo_actualizacion.png)
+- [Código fuente PlantUML del modelo](diagramas/Diagrama_modelo.puml)
+- [Diagrama de arquitectura](diagramas/Diagrama_arquitectura_actualizado.png)
 
 **Pendiente de verificación para la entrega:** actualizar el diagrama de clases conforme a las implementaciones más recientes, especialmente la fachada, repositorios y clases de interfaz gráfica.
 
 ## 10. Capturas de pantalla — pendientes de incorporar
-
-Agregar **capturas reales de la aplicación en ejecución** en la carpeta `docs/capturas/`, preferentemente en formato PNG. Se recomiendan al menos las siguientes:
-
-
-## Capturas de pantalla
 
 A continuación se muestran las principales interfaces del Sistema de Gestión de Farmacia, desarrollado en Java 21 utilizando Swing y FlatLaf.
 
